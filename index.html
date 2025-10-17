@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0" />
+  <title>PWT Unit Weekly Inspection</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#d32f2f">
+  
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIlBXVCBJbnNwZWN0aW9uIENoZWNrbGlzdCIsCiAgInNob3J0X25hbWUiOiAiUFdUIEluc3BlY3QiLAogICJkZXNjcmlwdGlvbiI6ICJXZWVrbHkgaW5zcGVjdGlvbiBjaGVja2xpc3QgZm9yIFBXVCB1bml0cy4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2U0ZThmMCIsCiAgInRoZW1lX2NvbG9yIjogIiNkMzJmMmYiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3BuZztiYXNlNjQsUEFTVEVfMTkyeDE5Ml9CQVNFNjRfU1RSSU5HX0hFUkUiLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9wbmc7YmFzZTY0LFBBU1RFXzUxMng1MTJfQkFTRTY0X1NUUklOR19IRVJFIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9Cg==">
+  
+  <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #d32f2f; --primary-dark: #b71c1c; --primary-light: #ff6659;
+      --secondary: #2e7d32; --secondary-dark: #1b5e20; --secondary-light: #60ad5e;
+      --accent: #ff9800; --accent-dark: #f57c00; --light: #ffffff; --light-alt: #f5f5f5;
+      --dark: #263238; --dark-alt: #37474f; --border: #e0e0e0; --border-light: #f0f0f0;
+      --shadow: 0 2px 10px rgba(0,0,0,0.08); --shadow-hover: 0 5px 15px rgba(0,0,0,0.12);
+      --radius: 8px; --radius-sm: 4px; --transition: all 0.3s ease;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+    body { background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%); padding: 8px; /* Mobile-first padding */ color: var(--dark); line-height: 1.6; min-height: 100vh; }
+    .container { max-width: 900px; margin: 0 auto; background: var(--light); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    
+    /* Mobile-first: Language Switch Position */
+    .header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 16px 20px; text-align: center; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .header h1 { font-size: 20px; margin: 0; font-weight: 600; }
+    .lang-switch { position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; gap: 5px; }
+    .lang-switch button { background: rgba(255, 255, 255, 0.2); color: white; border: none; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; transition: background 0.3s; }
+    .lang-switch button.active { background: white; color: var(--primary); }
+
+    .progress-container { padding: 16px 20px; background: var(--light-alt); border-bottom: 1px solid var(--border); }
+    .progress-bar { height: 8px; background: var(--border-light); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%); width: 0%; transition: width 0.5s ease; border-radius: 4px; }
+    .progress-text { display: flex; justify-content: space-between; font-size: 14px; color: var(--dark-alt); }
+    .step-container { padding: 12px; /* reduced padding for mobile */ }
+    .step { display: none; animation: fadeIn 0.5s ease; }
+    .step.active { display: block; }
+    .section { background: var(--light); border: 1px solid var(--border); border-radius: var(--radius); margin: 16px 0; padding: 16px; box-shadow: var(--shadow); transition: var(--transition); border-left: 4px solid var(--border); }
+    .section:hover { box-shadow: var(--shadow-hover); }
+    .section.completed { border-left: 4px solid var(--secondary); }
+    .section-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding-bottom: 8px; border-bottom: 1px solid var(--border-light); margin-bottom: 12px; }
+    .section-title { font-weight: 600; color: var(--primary); font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-content { display: none; padding-top: 8px; }
+    .section.expanded .section-content { display: block; }
+    .form-row { display: flex; gap: 10px; /* reduced gap */ flex-wrap: wrap; margin: -5px; }
+    .form-group { flex: 1 1 100%; /* Default to full width on mobile */ padding: 5px; min-width: 100%; }
+    label { display: block; margin: 8px 0 6px; font-weight: 600; font-size: 14px; color: var(--dark-alt); }
+    .required::after { content: " *"; color: var(--primary); }
+    input, select, textarea { width: 100%; padding: 12px; /* increased for better tapping */ border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 16px; background: white; transition: var(--transition); -webkit-appearance: none; appearance: none; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
+    .radio-group { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+    .radio-option { 
+        display: flex; align-items: center; gap: 8px; padding: 14px 18px; /* Larger touch target */
+        border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; 
+        background: white; transition: var(--transition); flex: 1; 
+        min-width: 100px; justify-content: center; user-select: none;
+    }
+    .radio-option:active { transform: scale(0.98); }
+    .radio-option.selected { background: var(--primary); color: white; border-color: var(--primary); }
+    .radio-option.selected-ok { background: var(--secondary); color: white; border-color: var(--secondary); }
+    .radio-option.selected-na { background: var(--dark-alt); color: white; border-color: var(--dark-alt); }
+    .radio-input { display: none; }
+    
+    /* Photo Upload Styling Optimization for Mobile */
+    .photo-upload input[type="file"] {
+        display: none; /* Hide the native file input */
+    }
+    .photo-upload label[for*="-photo"] {
+        display: block; /* Ensure the custom button is a block element */
+        background: var(--accent); /* Accent color for visibility */
+        color: white;
+        border: none;
+        padding: 14px 20px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: var(--transition);
+        text-align: center;
+        margin-top: 8px;
+        margin-bottom: 0; /* Adjust spacing */
+        line-height: 1; /* Center text vertically */
+    }
+    .photo-upload label[for*="-photo"]:hover {
+        background: var(--accent-dark);
+    }
+    /* Photo preview styles remain the same */
+    .photo-preview-container { position: relative; margin-top: 8px; display: none; }
+    .photo-preview { max-width: 100%; max-height: 200px; border-radius: var(--radius-sm); border: 1px solid var(--border); object-fit: cover; }
+    .remove-photo-btn { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; line-height: 30px; cursor: pointer; font-size: 16px; text-align: center; display: flex; align-items: center; justify-content: center; }
+    .photo-preview-container.show { display: block; }
+    .photo-counter { font-size: 12px; color: var(--dark-alt); margin-top: 4px; }
+
+
+    .btn { background: var(--primary); color: white; border: none; padding: 18px 24px; /* Larger touch target */ border-radius: var(--radius-sm); cursor: pointer; font-size: 16px; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
+    .btn:hover { background: var(--primary-dark); }
+    .btn:active { transform: translateY(1px); box-shadow: none; }
+    .btn:disabled { background: #cccccc; cursor: not-allowed; }
+    .btn-secondary { background: var(--secondary); }
+    .btn-secondary:hover { background: var(--secondary-dark); }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 16px 24px; /* Adjust padding for outline buttons */ }
+    .btn-full { width: 100%; }
+    .btn-group { display: flex; gap: 10px; margin: 20px 0; flex-direction: column; /* Mobile-first: stack buttons */ }
+    .hidden { display: none !important; }
+    
+    .step-indicator { display: flex; justify-content: space-around; margin: 16px 0; position: relative; padding: 0 10px; }
+    .step-item { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; flex-basis: 30%; /* Give steps a proportional width */ }
+    .step-number { width: 36px; height: 36px; border-radius: 50%; background: white; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 600; margin-bottom: 6px; transition: var(--transition); font-size: 14px; }
+    .step-item.active .step-number { background: var(--primary); border-color: var(--primary); color: white; }
+    .step-item.completed .step-number { background: var(--secondary); border-color: var(--secondary); color: white; }
+    .step-label { font-size: 12px; font-weight: 500; text-align: center; }
+
+    /* Improved Modal for Mobile */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; }
+    .modal-content { 
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+        background: white; padding: 20px; border-radius: 0; /* Full screen on mobile */ 
+        box-shadow: none; z-index: 1001; max-width: 100%; width: 100%; max-height: 100vh; 
+        overflow-y: auto; transform: none;
+    }
+    
+    .loader-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.9); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .loader { border: 8px solid #f3f3f3; border-radius: 50%; border-top: 8px solid var(--primary); width: 60px; height: 60px; animation: spin 1s linear infinite; }
+    .loader-text { margin-top: 16px; font-size: 18px; color: var(--dark); font-weight: 600; }
+    
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @media (min-width: 768px) {
+      /* Revert some styles for tablet/desktop */
+      body { padding: 16px; }
+      .step-container { padding: 20px; }
+      .form-row { gap: 20px; margin: -10px; }
+      .form-group { flex: 1 1 300px; padding: 10px; min-width: 250px; }
+      .radio-group { flex-direction: row; }
+      .btn-group { flex-direction: row; gap: 12px; }
+      .modal-content { top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: var(--radius); box-shadow: var(--shadow-hover); max-width: 500px; width: 500px; max-height: 80vh; }
+      .step-indicator { flex-wrap: nowrap; justify-content: space-between; }
+      .lang-switch { position: static; margin-bottom: 10px; justify-content: center; }
+    }
+    
+    @media (max-width: 480px) {
+        /* Very small screens: stack radio buttons */
+        .radio-group { flex-direction: column; }
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root { --light: #1e1e1e; --light-alt: #2d2d2d; --dark: #f5f5f5; --dark-alt: #e0e0e0; --border: #404040; }
+      body { background: linear-gradient(135deg, #121212 0%, #2d2d2d 100%); }
+      input, select, textarea { background: #2d2d2d; color: var(--dark); border-color: #404040; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loader-overlay" class="loader-overlay hidden">
+    <div class="loader"></div>
+    <p id="loader-text" class="loader-text">Processing...</p>
+  </div>
+
+  <div class="container">
+    <div class="header">
+        <div class="lang-switch">
+            <button id="lang-en" class="active" onclick="setLang('en')">English</button>
+            <button id="lang-ar" onclick="setLang('ar')">العربية</button>
+        </div>
+        <h1 data-en="PWT UNIT WEEKLY INSPECTION CHECKLIST" data-ar="قائمة فحص وحدة PWT الأسبوعية">PWT UNIT WEEKLY INSPECTION CHECKLIST</h1>
+        <div class="subtitle" data-en="Complete the basic information to begin inspection" data-ar="أكمل المعلومات الأساسية لبدء الفحص">Complete the basic information to begin inspection</div>
+    </div>
+    
+    <div class="step-indicator">
+      <div class="step-item active" id="step-indicator-1">
+        <div class="step-number">1</div>
+        <div class="step-label" data-en="Basic Info" data-ar="المعلومات الأساسية">Basic Info</div>
+      </div>
+      <div class="step-item" id="step-indicator-2">
+        <div class="step-number">2</div>
+        <div class="step-label" data-en="Inspection" data-ar="الفحص">Inspection</div>
+      </div>
+      <div class="step-item" id="step-indicator-3">
+        <div class="step-number">3</div>
+        <div class="step-label" data-en="Report" data-ar="التقرير">Report</div>
+      </div>
+    </div>
+
+    <div class="step active" id="step1">
+      
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progress-text">0% Complete</span>
+          <span data-en="Step 1 of 3" data-ar="الخطوة 1 من 3">Step 1 of 3</span>
+        </div>
+      </div>
+
+      <div class="step-container">
+         <div class="section expanded">
+          <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-title">
+              <i class="fas fa-info-circle"></i>
+              <span data-en="Basic Information" data-ar="المعلومات الأساسية">Basic Information</span>
+            </div>
+            <span>▲</span>
+          </div>
+          <div class="section-content" style="display: block;">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="equipmentType" class="required" data-en="Type of Equipment" data-ar="نوع المعدات">Type of Equipment</label>
+                <input type="text" id="equipmentType" placeholder="Enter equipment type" required />
+                <div class="error-message" id="equipmentType-error" data-en="Equipment type is required" data-ar="نوع المعدات مطلوب"></div>
+              </div>
+              <div class="form-group">
+                <label for="areaLocation" class="required" data-en="Area / Location" data-ar="المنطقة / الموقع">Area / Location</label>
+                <input type="text" id="areaLocation" placeholder="Enter location" required />
+                <div class="error-message" id="areaLocation-error" data-en="Area/Location is required" data-ar="المنطقة / الموقع مطلوب"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="tagNo" class="required" data-en="Tag No / Description" data-ar="رقم العلامة / الوصف">Tag No / Description</label>
+                <input type="text" id="tagNo" placeholder="Enter tag no" required />
+                <div class="error-message" id="tagNo-error" data-en="Tag No is required" data-ar="رقم العلامة مطلوب"></div>
+              </div>
+              <div class="form-group">
+                <label for="inspectedBy" class="required" data-en="Inspected By" data-ar="تم الفحص بواسطة">Inspected By</label>
+                <input type="text" id="inspectedBy" placeholder="Your name" value="Inspector Name" required />
+                <div class="error-message" id="inspectedBy-error" data-en="Inspector name is required" data-ar="اسم المفتش مطلوب"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="inspectionDate" class="required" data-en="Date of Inspection" data-ar="تاريخ الفحص">Date of Inspection</label>
+                <input type="date" id="inspectionDate" required />
+                <div class="error-message" id="inspectionDate-error" data-en="Inspection date is required" data-ar="تاريخ الفحص مطلوب"></div>
+              </div>
+              <div class="form-group">
+                <label for="inspectionTime" class="required" data-en="Time of Inspection" data-ar="وقت الفحص">Time of Inspection</label>
+                <input type="time" id="inspectionTime" required />
+                <div class="error-message" id="inspectionTime-error" data-en="Inspection time is required" data-ar="وقت الفحص مطلوب"></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="emails" class="required" data-en="Recipient Emails (comma separated)" data-ar="عناوين البريد الإلكتروني (مفصولة بفواصل)">Recipient Emails (comma separated)</label>
+              <input type="text" id="emails" placeholder="qaqc@omi.om, manager@company.com" value="system@yourcompany.com" required />
+              <div class="error-message" id="emails-error" data-en="At least one valid email is required" data-ar="مطلوب بريد إلكتروني واحد صالح على الأقل"></div>
+              <small data-en="At least one email required. Separate multiple emails with commas." data-ar="مطلوب بريد إلكتروني واحد على الأقل. افصل بين عناوين البريد الإلكتروني المتعددة بفواصل."></small>
+            </div>
+          </div>
+        </div>
+
+        <div class="section expanded">
+          <div class="section-header" onclick="toggleSection(this)">
+            <div class="section-title">
+              <i class="fas fa-cogs"></i>
+              <span data-en="Equipment Selection" data-ar="اختيار المعدات">Equipment Selection</span>
+            </div>
+            <span>▲</span>
+          </div>
+          <div class="section-content" style="display: block;">
+            <div class="form-group">
+              <label for="equipment" class="required" data-en="Select Equipment or Scan QR" data-ar="اختر المعدات أو امسح رمز الاستجابة السريعة">Select Equipment or Scan QR</label>
+              <select id="equipment" required>
+                <option value="">-- Select --</option>
+                <option value="PWT-001">PWT-001</option><option value="PWT-002">PWT-002</option><option value="PWT-003">PWT-003</option><option value="PWT-004">PWT-004</option><option value="PWT-005">PWT-005</option><option value="DAN-001">DAN-001</option><option value="OLD-001">OLD-001</option><option value="SSU-001">SSU-001</option>
+              </select>
+              <div class="error-message" id="equipment-error" data-en="Equipment selection is required" data-ar="اختيار المعدات مطلوب"></div>
+            </div>
+
+            <button class="btn btn-outline btn-full" onclick="startQRScan()">
+              <i class="fas fa-qrcode"></i>
+              <span data-en="Scan QR Code" data-ar="مسح رمز الاستجابة السريعة">Scan QR Code</span>
+            </button>
+            
+            <div id="qr-container" class="qr-scanner hidden" style="width: 100%; height: 200px; background: #000; margin: 16px 0; position: relative; border-radius: 8px; overflow: hidden;"></div>
+            <div id="qr-status" class="success-message" data-en="QR code scanned successfully!" data-ar="تم مسح رمز الاستجابة السريعة بنجاح!"></div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-secondary" onclick="showHistory()">
+            <i class="fas fa-history"></i>
+            <span data-en="View History" data-ar="عرض السجل">View History</span>
+          </button>
+          <button class="btn" id="begin-btn" onclick="validateAndStart()" disabled>
+            <i class="fas fa-play-circle"></i>
+            <span data-en="Begin Inspection" data-ar="ابدأ الفحص">Begin Inspection</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="step" id="step2">
+      <div class="header">
+        <h1 data-en="PWT UNIT WEEKLY INSPECTION CHECKLIST" data-ar="قائمة فحص وحدة PWT الأسبوعية">PWT UNIT WEEKLY INSPECTION CHECKLIST</h1>
+        <div class="subtitle" data-en="Complete the inspection checklist" data-ar="أكمل قائمة الفحص"></div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill-inspect"></div>
+        </div>
+        <div class="progress-text">
+          <span id="progress-text-inspect">0% Complete</span>
+          <span data-en="Step 2 of 3" data-ar="الخطوة 2 من 3"></span>
+        </div>
+      </div>
+
+      <div class="step-container">
+        <div class="info-card" style="background: rgba(33, 150, 243, 0.05); border: 1px solid rgba(33, 150, 243, 0.2); border-radius: 4px; padding: 16px; margin: 16px 0;">
+          <i class="fas fa-info-circle" style="color: #2196f3; margin-right: 8px;"></i>
+          <strong data-en="Inspection Summary" data-ar="ملخص الفحص"></strong>
+          <span id="issue-counter" class="issue-counter" style="color: var(--primary); font-weight: bold; float: right;"></span>
+          <div id="inspection-summary"></div>
+        </div>
+
+        <div id="checklist-form"></div>
+
+        <div class="btn-group">
+          <button class="btn btn-outline" onclick="goBackToStep1()">
+            <i class="fas fa-arrow-left"></i>
+            <span data-en="Back" data-ar="رجوع"></span>
+          </button>
+          <button class="btn btn-secondary" id="submit-report-btn" onclick="submitInspection()" disabled>
+            <i class="fas fa-check-circle"></i>
+            <span data-en="Submit Report" data-ar="إرسال التقرير"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="step" id="step3">
+      <div class="header">
+        <h1 data-en="PWT UNIT WEEKLY INSPECTION CHECKLIST" data-ar="قائمة فحص وحدة PWT الأسبوعية"></h1>
+        <div class="subtitle" data-en="Review and download your inspection report" data-ar="راجع وقم بتنزيل تقرير الفحص"></div>
+      </div>
+
+      <div class="step-container">
+        <div class="report-section" style="background: var(--light); padding: 24px; border-radius: 8px; margin: 20px 0; box-shadow: var(--shadow);">
+          <h2 data-en="Inspection Report" data-ar="تقرير الفحص"></h2>
+          <div id="report-output"></div>
+          
+          <div class="btn-group">
+            <button class="btn btn-outline" onclick="goBackToStep2()">
+              <i class="fas fa-edit"></i>
+              <span data-en="Edit Inspection" data-ar="تحرير الفحص"></span>
+            </button>
+            <button class="btn" onclick="downloadPDF()">
+              <i class="fas fa-file-pdf"></i>
+              <span data-en="Download PDF" data-ar="تحميل PDF"></span>
+            </button>
+             <button class="btn" onclick="downloadExcel()" style="background-color: var(--secondary);">
+              <i class="fas fa-file-excel"></i>
+              <span data-en="Download Excel" data-ar="تحميل Excel"></span>
+            </button>
+          </div>
+          <div class="btn-group">
+             <button class="btn btn-secondary" onclick="shareByEmail()">
+                <i class="fas fa-envelope"></i>
+                <span data-en="Share via Email" data-ar="مشاركة عبر البريد الإلكتروني"></span>
+              </button>
+            <button class="btn" onclick="startNewInspection()">
+              <i class="fas fa-plus-circle"></i>
+              <span data-en="New Inspection" data-ar="فحص جديد"></span>
+            </button>
+          </div>
+          
+          <div class="form-group email-instructions-container" style="margin-top: 24px; position: relative;">
+            <label data-en="Email Instructions" data-ar="تعليمات البريد الإلكتروني"></label>
+            <textarea id="email-instructions" rows="4" readonly></textarea>
+            <button class="copy-btn" onclick="copyEmailInstructions()" style="position: absolute; top: 35px; right: 10px; background: var(--secondary); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-copy"></i>
+            </button>
+            <small data-en="Copy this text and send via email, or use the download option above." data-ar="انسخ هذا النص وأرسله عبر البريد الإلكتروني، أو استخدم خيار التحميل أعلاه."></small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="history-modal" class="hidden">
+      <div class="modal-overlay" onclick="hideHistory()"></div>
+      <div class="modal-content">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border);">
+          <h3 data-en="Inspection History" data-ar="سجل الفحوصات"></h3>
+          <button class="close-btn" onclick="hideHistory()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--dark-alt);">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="history-list"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // === START: IndexedDB Photo Storage Helpers (Unchanged) ===
+    const DB_NAME = 'inspectionPhotoDB';
+    const STORE_NAME = 'photos';
+    let db;
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = event => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = event => {
+          db = event.target.result;
+          resolve(db);
+        };
+        request.onerror = event => reject(event.target.error);
+      });
+    }
+
+    function storePhoto(key, blob) {
+      if (!db) return Promise.reject("DB not initialized");
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.put({ id: key, data: blob });
+        request.onsuccess = () => resolve();
+        request.onerror = event => reject(event.target.error);
+      });
+    }
+
+    function getPhoto(key) {
+      if (!db) return Promise.reject("DB not initialized");
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(STORE_NAME, 'readonly');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.get(key);
+        request.onsuccess = event => resolve(event.target.result ? event.target.result.data : null);
+        request.onerror = event => reject(event.target.error);
+      });
+    }
+
+    function deletePhoto(key) {
+        if (!db) return Promise.reject("DB not initialized");
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(key);
+            request.onsuccess = () => resolve();
+            request.onerror = (event) => reject(event.target.error);
+        });
+    }
+    
+    function clearAllPhotos() {
+        if (!db) return Promise.reject("DB not initialized");
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(STORE_NAME, 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.clear();
+            request.onsuccess = () => resolve();
+            request.onerror = (event) => reject(event.target.error);
+        });
+    }
+
+    function fileToDataURL(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+    // === END: IndexedDB Helpers ===
+
+
+    const translations = {
+      en: {'Basic Information': 'Basic Information','Equipment Type': 'Equipment Type','Area/Location': 'Area / Location','Tag No / Description': 'Tag No / Description','Inspected By': 'Inspected By','Date': 'Date','Time': 'Time','Recipient Emails': 'Recipient Emails','Select Equipment or Scan QR': 'Select Equipment or Scan QR','Begin Inspection': 'Begin Inspection','PWT UNIT WEEKLY INSPECTION CHECKLIST': 'PWT UNIT WEEKLY INSPECTION CHECKLIST',"Unit's Body": "Unit's Body",'Flanges and Joint': 'FLANGES AND JOINT','Jiskoot Sampler': 'JISKOOT SAMPLER','Jib Crane': 'JIB CRANE','Rim / Tyres': 'RIM / TYRES','Axles and Suspension': 'AXLES AND SUSPENSION','Emergency Equipment': 'EMERGENCY EQUIPMENT','Tools and Accessories': 'TOOLS AND ACCESSORIES','Compressor System': 'COMPRESSOR SYSTEM','Drain Tank': 'DRAIN TANK','OK': 'OK','NOT OK': 'NOT OK','N/A': 'N/A','Remarks': 'Remarks','Attach Photo': 'Attach Photo','Inspection Date': 'Inspection Date','Inspector Name': 'Inspector Name','Equipment': 'Equipment','Status': 'Status','Report Generated': 'Report Generated','Copy this report and email to the addresses above.': 'Copy this report and email to the addresses above.','General Information': 'General Information','Electrical / Electronics System': 'Electrical / Electronics System','Wind sock': 'Wind sock','Body Paint / Dents': 'Body Paint / Dents','Towing Equipment / Hook': 'Towing Equipment / Hook','Reflective Stickers': 'Reflective Stickers','Name Plates': 'Name Plates','Separator Vessel & Piping Insulations': 'Separator Vessel & Piping Insulations','Spool Insulations': 'Spool Insulations',"Unit's Cleanliness": "Unit's Cleanliness",'Battery Status': 'Battery Status','Instruments / Gauges & PSV': 'Instruments / Gauges & PSV','Knobs': 'Knobs','Solar Panels': 'Solar Panels','HMI / PLC': 'HMI / PLC','Solar Charge Controller': 'Solar Charge Controller','Cables and Shrouds': 'Cables and Shrouds','Flange Bolts and Nuts': 'Flange Bolts and Nuts','Flange Surfaces': 'Flange Surfaces','Clamps': 'Clamps','Ball Joints / Flexible Arms': 'Ball Joints / Flexible Arms','Adopter Spools / Hoses': 'Adopter Spools / Hoses','Graphite Packing Gasket': 'Graphite Packing Gasket','Snap Rings': 'Snap Rings','Aline Key Screws / Bolts': 'Aline Key Screws / Bolts','Relief Valve Calibration': 'Relief Valve Calibration','PRV Chock Been': 'PRV Chock Been','Orifice Plate Condition': 'Orifice Plate Condition','Straightening Vanes': 'Straightening Vanes','Seals': 'Seals','O-Rings': 'O-Rings','Sample Tools': 'Sample Tools','Capture Tools': 'Capture Tools','Check Valves (Internal / External)': 'Check Valves (Internal / External)','Rope Condition': 'Rope Condition','Hydraulic Jack Condition': 'Hydraulic Jack Condition','Lifting Belts and Shackle': 'Lifting Belts and Shackle','Hook and Latch': 'Hook and Latch','Tyre Pressure': 'Tyre Pressure','Tyre and Rim Condition': 'Tyre and Rim Condition','Front / Rear Axles': 'Front / Rear Axles','Leaf Spring / Shock Absorber': 'Leaf Spring / Shock Absorber','Stability Jacks': 'Stability Jacks','Hand Brake & Brake Fluid Cup': 'Hand Brake & Brake Fluid Cup','Assembly Point Board': 'Assembly Point Board','Hazard Warning Board': 'Hazard Warning Board','Reflective Cones': 'Reflective Cones','Fire Extinguisher': 'Fire Extinguisher','Spare Tyres Available': 'Spare Tyres Available','Hammer': 'Hammer','Spanner': 'Spanner','Pipe Wrench': 'Pipe Wrench','Tighter Machine': 'Tighter Machine','Noise / Vibration': 'Noise / Vibration','Pressure Regulator and Switch': 'Pressure Regulator and Switch','Cover / Cap': 'Cover / Cap','Leaks': 'Leaks','Drain Valve Condition': 'Drain Valve Condition','Drain Hose': 'Drain Hose','Inspection Summary': 'Inspection Summary','Download Excel': 'Download Excel','Share via Email': 'Share via Email'},
+      ar: {'Basic Information': 'المعلومات الأساسية','Equipment Type': 'نوع المعدات','Area/Location': 'المنطقة / الموقع','Tag No / Description': 'رقم العلامة / الوصف','Inspected By': 'تم الفحص بواسطة','Date': 'التاريخ','Time': 'الوقت','Recipient Emails': 'عناوين البريد الإلكتروني','Select Equipment or Scan QR': 'اختر المعدات أو امسح رمز الاستجابة السريعة','Begin Inspection': 'ابدأ الفحص','PWT UNIT WEEKLY INSPECTION CHECKLIST': 'قائمة فحص وحدة PWT الأسبوعية',"Unit's Body": 'جسم الوحدة','Flanges and Joint': 'الشفات والوصلات','Jiskoot Sampler': 'جهاز أخذ العينات جيسكوت','Jib Crane': 'رافعة جيب','Rim / Tyres': 'الإطارات والجنوط','Axles and Suspension': 'محاور ونظام التعليق','Emergency Equipment': 'معدات الطوارئ','Tools and Accessories': 'الأدوات والملحقات','Compressor System': 'نظام الضاغط','Drain Tank': 'خزان التصريف','OK': 'جيد','NOT OK': 'غير جيد','N/A': 'غير مطبق','Remarks': 'ملاحظات','Attach Photo': 'إرفاق صورة','Inspection Date': 'تاريخ الفحص','Inspector Name': 'اسم المفتش','Equipment': 'المعدات','Status': 'الحالة','Report Generated': 'تم إنشاء التقرير','Copy this report and email to the addresses above.': 'انسخ هذا التقرير وأرسله إلى العناوين أعلاه.','General Information': 'معلومات عامة','Electrical / Electronics System': 'النظام الكهربائي / الإلكتروني','Wind sock': 'غلاف الرياح','Body Paint / Dents': 'طلاء الجسم / الكدمات','Towing Equipment / Hook': 'معدات السحب / الخطاف','Reflective Stickers': 'الملصقات العاكسة','Name Plates': 'لوحات الأسماء','Separator Vessel & Piping Insulations': 'وعاء الفصل والعزل الأنبوبي','Spool Insulations': 'عزل البكرات',"Unit's Cleanliness": 'نظافة الوحدة','Battery Status': 'حالة البطارية','Instruments / Gauges & PSV': 'الأجهزة / العدادات و PSV','Knobs': 'الأزرار','Solar Panels': 'ألواح الطاقة الشمسية','HMI / PLC': 'واجهة الإنسان الآلة / PLC','Solar Charge Controller': 'وحدة تحكم شحن الطاقة الشمسية','Cables and Shrouds': 'الكابلات والأغطية','Flange Bolts and Nuts': 'براغي وصواميل الشفة','Flange Surfaces': 'سطوح الشفة','Clamps': 'المشابك','Ball Joints / Flexible Arms': 'المفاصل الكروية / الأذرع المرنة','Adopter Spools / Hoses': 'بكرات / خراطيم المحول','Graphite Packing Gasket': 'حشوة غرافيت','Snap Rings': 'حلقات القفل','Aline Key Screws / Bolts': 'براغي / مسامير المفتاح المحاذي','Relief Valve Calibration': 'معايرة صمام التخفيف','PRV Chock Been': 'مثبت PRV','Orifice Plate Condition': 'حالة لوحة الفتحة','Straightening Vanes': 'أجنحة التقويم','Seals': 'الختم','O-Rings': 'حلقات O','Sample Tools': 'أدوات أخذ العينات','Capture Tools': 'أدوات التقاط','Check Valves (Internal / External)': 'صمامات الفحص (داخلية / خارجية)','Rope Condition': 'حالة الحبل','Hydraulic Jack Condition': 'حالة الرافعة الهيدروليكية','Lifting Belts and Shackle': 'أحزمة الرفع والمشبك','Hook and Latch': 'الخطاف والقفل','Tyre Pressure': 'ضغط الإطار','Tyre and Rim Condition': 'حالة الإطار والجنط','Front / Rear Axles': 'محاور الأمامية / الخلفية','Leaf Spring / Shock Absorber': 'زنبرك الورقة / ممتص الصدمات','Stability Jacks': 'رافعات الثبات','Hand Brake & Brake Fluid Cup': 'فرامل اليد وكوب سائل الفرامل','Assembly Point Board': 'لوحة نقطة التجمع','Hazard Warning Board': 'لوحة تحذير الخطر','Reflective Cones': 'مخالب عاكسة','Fire Extinguisher': 'طفاية حريق','Spare Tyres Available': 'إطارات احتياطية متاحة','Hammer': 'مطرقة','Spanner': 'مفتاح','Pipe Wrench': 'مفتاح أنابيب','Tighter Machine': 'آلة التثبيت','Noise / Vibration': 'ضوضاء / اهتزاز','Pressure Regulator and Switch': 'منظم الضغط والمفتاح','Cover / Cap': 'غطاء / قبعة','Leaks': 'تسريبات','Drain Valve Condition': 'حالة صمام التصريف','Drain Hose': 'خرطوم التصريف','Inspection Summary': 'ملخص الفحص','Download Excel': 'تحميل Excel','Share via Email': 'مشاركة عبر البريد الإلكتروني'}
+    };
+
+    let currentLang = 'en', checklistData = [], currentStep = 1;
+    let inspectionState = { responses: {}, photoKeys: {} };
+    
+    // DOM Elements
+    const allSteps = document.querySelectorAll('.step');
+    const stepIndicators = document.querySelectorAll('.step-item');
+    const checklistForm = document.getElementById('checklist-form');
+    const reportOutput = document.getElementById('report-output');
+    const emailInstructions = document.getElementById('email-instructions');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const progressFillInspect = document.getElementById('progress-fill-inspect');
+    const progressTextInspect = document.getElementById('progress-text-inspect');
+    const beginBtn = document.getElementById('begin-btn');
+    const submitReportBtn = document.getElementById('submit-report-btn');
+    const historyModal = document.getElementById('history-modal');
+    const historyList = document.getElementById('history-list');
+    const inspectionSummary = document.getElementById('inspection-summary');
+    const issueCounter = document.getElementById('issue-counter');
+    const loaderOverlay = document.getElementById('loader-overlay');
+    const loaderText = document.getElementById('loader-text');
+
+    function sanitizeForId(text) { return text.replace(/[^a-zA-Z0-9]/g, '-'); }
+    
+    function saveState() {
+        const basicInfo = {
+            equipmentType: document.getElementById('equipmentType').value, areaLocation: document.getElementById('areaLocation').value, tagNo: document.getElementById('tagNo').value,
+            inspectedBy: document.getElementById('inspectedBy').value, inspectionDate: document.getElementById('inspectionDate').value, inspectionTime: document.getElementById('inspectionTime').value,
+            emails: document.getElementById('emails').value, equipment: document.getElementById('equipment').value,
+        };
+        localStorage.setItem('currentInspectionBasicInfo', JSON.stringify(basicInfo));
+        localStorage.setItem('currentInspectionState', JSON.stringify(inspectionState));
+    }
+
+    function loadState() {
+        const basicInfo = JSON.parse(localStorage.getItem('currentInspectionBasicInfo'));
+        const savedState = JSON.parse(localStorage.getItem('currentInspectionState'));
+        if (basicInfo) {
+            document.getElementById('equipmentType').value = basicInfo.equipmentType || ''; document.getElementById('areaLocation').value = basicInfo.areaLocation || '';
+            document.getElementById('tagNo').value = basicInfo.tagNo || ''; document.getElementById('inspectedBy').value = basicInfo.inspectedBy || 'Inspector Name';
+            document.getElementById('inspectionDate').value = basicInfo.inspectionDate || new Date().toISOString().split('T')[0];
+            document.getElementById('inspectionTime').value = basicInfo.inspectionTime || new Date().toTimeString().substring(0, 5);
+            document.getElementById('emails').value = basicInfo.emails || 'system@yourcompany.com'; document.getElementById('equipment').value = basicInfo.equipment || '';
+        }
+        if (savedState) { inspectionState = savedState; }
+    }
+
+    function initializeChecklist() {
+        checklistData = [{"category":"Unit's Body","item":"Wind sock"},{"category":"Unit's Body","item":"Body Paint / Dents"},{"category":"Unit's Body","item":"Towing Equipment / Hook"},{"category":"Unit's Body","item":"Reflective Stickers"},{"category":"Unit's Body","item":"Name Plates"},{"category":"Unit's Body","item":"Separator Vessel & Piping Insulations"},{"category":"Unit's Body","item":"Spool Insulations"},{"category":"Unit's Body","item":"Unit's Cleanliness"},{"category":"Electrical / Electronics System","item":"Battery Status"},{"category":"Electrical / Electronics System","item":"Instruments / Gauges & PSV"},{"category":"Electrical / Electronics System","item":"Knobs"},{"category":"Electrical / Electronics System","item":"Solar Panels"},{"category":"Electrical / Electronics System","item":"HMI / PLC"},{"category":"Electrical / Electronics System","item":"Solar Charge Controller"},{"category":"Electrical / Electronics System","item":"Cables and Shrouds"},{"category":"Flanges and Joint","item":"Flange Bolts and Nuts"},{"category":"Flanges and Joint","item":"Flange Surfaces"},{"category":"Flanges and Joint","item":"Clamps"},{"category":"Flanges and Joint","item":"Ball Joints / Flexible Arms"},{"category":"Flanges and Joint","item":"Adopter Spools / Hoses"},{"category":"Flanges and Joint","item":"Graphite Packing Gasket"},{"category":"Flanges and Joint","item":"Snap Rings"},{"category":"Flanges and Joint","item":"Aline Key Screws / Bolts"},{"category":"Flanges and Joint","item":"Relief Valve Calibration"},{"category":"Flanges and Joint","item":"PRV Chock Been"},{"category":"Flanges and Joint","item":"Orifice Plate Condition"},{"category":"Flanges and Joint","item":"Straightening Vanes"},{"category":"Jiskoot Sampler","item":"Seals"},{"category":"Jiskoot Sampler","item":"O-Rings"},{"category":"Jiskoot Sampler","item":"Sample Tools"},{"category":"Jiskoot Sampler","item":"Capture Tools"},{"category":"Jiskoot Sampler","item":"Check Valves (Internal / External)"},{"category":"Jib Crane","item":"Rope Condition"},{"category":"Jib Crane","item":"Hydraulic Jack Condition"},{"category":"Jib Crane","item":"Lifting Belts and Shackle"},{"category":"Jib Crane","item":"Hook and Latch"},{"category":"Rim / Tyres","item":"Tyre Pressure"},{"category":"Rim / Tyres","item":"Tyre and Rim Condition"},{"category":"Axles and Suspension","item":"Front / Rear Axles"},{"category":"Axles and Suspension","item":"Leaf Spring / Shock Absorber"},{"category":"Axles and Suspension","item":"Stability Jacks"},{"category":"Axles and Suspension","item":"Hand Brake & Brake Fluid Cup"},{"category":"Emergency Equipment","item":"Assembly Point Board"},{"category":"Emergency Equipment","item":"Hazard Warning Board"},{"category":"Emergency Equipment","item":"Reflective Cones"},{"category":"Emergency Equipment","item":"Fire Extinguisher"},{"category":"Emergency Equipment","item":"Spare Tyres Available"},{"category":"Tools and Accessories","item":"Hammer"},{"category":"Tools and Accessories","item":"Spanner"},{"category":"Tools and Accessories","item":"Pipe Wrench"},{"category":"Tools and Accessories","item":"Tighter Machine"},{"category":"Compressor System","item":"Noise / Vibration"},{"category":"Compressor System","item":"Pressure Regulator and Switch"},{"category":"Drain Tank","item":"Cover / Cap"},{"category":"Drain Tank","item":"Leaks"},{"category":"Drain Tank","item":"Drain Valve Condition"},{"category":"Drain Tank","item":"Drain Hose"}];
+        checklistData.forEach(item => item.options = ["OK", "NOT OK", "N/A"]);
+    }
+
+    function goToStep(stepNumber) {
+        allSteps.forEach(step => step.classList.remove('active'));
+        document.getElementById(`step${stepNumber}`).classList.add('active');
+        stepIndicators.forEach((item, index) => {
+            item.classList.remove('active', 'completed');
+            if (index + 1 === stepNumber) item.classList.add('active');
+            else if (index + 1 < stepNumber) item.classList.add('completed');
+        });
+        currentStep = stepNumber;
+        if (stepNumber === 2) { updateInspectionSummary(); updateProgress(); }
+    }
+    function goBackToStep1() { goToStep(1); }
+    function goBackToStep2() { goToStep(2); }
+
+    async function startNewInspection() {
+        if (!confirm("Are you sure you want to start a new inspection? All current progress will be lost.")) return;
+        localStorage.removeItem('currentInspectionBasicInfo');
+        localStorage.removeItem('currentInspectionState');
+        await clearAllPhotos();
+        inspectionState = { responses: {}, photoKeys: {} };
+        document.getElementById('equipmentType').value = ''; document.getElementById('areaLocation').value = '';
+        document.getElementById('tagNo').value = ''; document.getElementById('inspectedBy').value = 'Inspector Name';
+        document.getElementById('inspectionDate').value = new Date().toISOString().split('T')[0];
+        document.getElementById('inspectionTime').value = new Date().toTimeString().substring(0, 5);
+        document.getElementById('emails').value = 'system@yourcompany.com'; document.getElementById('equipment').value = '';
+        checklistForm.innerHTML = '';
+        goToStep(1);
+        updateProgress();
+    }
+
+    function updateInspectionSummary() {
+      const formData = JSON.parse(localStorage.getItem('currentInspectionBasicInfo'));
+      if (!formData) return;
+      inspectionSummary.innerHTML = `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;"><div><strong>${translations[currentLang]['Equipment']}:</strong> ${formData.equipment}</div><div><strong>${translations[currentLang]['Equipment Type']}:</strong> ${formData.equipmentType}</div><div><strong>${translations[currentLang]['Area/Location']}:</strong> ${formData.areaLocation}</div><div><strong>${translations[currentLang]['Tag No / Description']}:</strong> ${formData.tagNo}</div><div><strong>${translations[currentLang]['Inspected By']}:</strong> ${formData.inspectedBy}</div><div><strong>${translations[currentLang]['Date']}:</strong> ${formData.inspectionDate} ${formData.inspectionTime}</div></div>`;
+    }
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        document.querySelectorAll('[data-en]').forEach(el => {
+            const key = el.dataset.en;
+            el.textContent = translations[lang]?.[key] || key;
+        });
+        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+        document.getElementById('lang-ar').classList.toggle('active', lang === 'ar');
+        if (currentStep === 2) { updateInspectionSummary(); renderChecklist(); }
+        updateProgress();
+    }
+
+    function startQRScan() {
+      const container = document.getElementById('qr-container');
+      const qrStatus = document.getElementById('qr-status');
+      container.classList.remove('hidden'); qrStatus.style.display = 'none';
+      Quagga.init({ inputStream: { name: "Live", type: "LiveStream", target: container, constraints: { width: 640, height: 480, facingMode: "environment" }}, decoder: { readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader", "code_39_vin_reader", "codabar_reader", "upc_reader", "upc_e_reader", "i2of5_reader"] }, locator: { patchSize: "medium", halfSample: true }}, function(err) {
+        if (err) { console.error("QR scanner failed:", err); alert("QR scanner failed to initialize. Please select equipment manually."); container.classList.add('hidden'); return; }
+        Quagga.start();
+      });
+      Quagga.onDetected(function(data) {
+        const code = data.codeResult.code; const validCodes = ['PWT-001','PWT-002','PWT-003','PWT-004','PWT-005','DAN-001','OLD-001','SSU-001'];
+        if (validCodes.includes(code)) {
+          document.getElementById('equipment').value = code; Quagga.stop(); container.classList.add('hidden'); qrStatus.style.display = 'block'; updateProgress();
+        } else { alert("Invalid QR code. Please scan a valid equipment code."); }
+      });
+    }
+
+    function validateForm() {
+      let isValid = true; const requiredFields = ['equipmentType', 'areaLocation', 'tagNo', 'inspectedBy', 'inspectionDate', 'inspectionTime', 'emails', 'equipment'];
+      requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId); const errorElement = document.getElementById(`${fieldId}-error`);
+        if (!field.value.trim()) { errorElement.style.display = 'block'; field.style.borderColor = 'var(--primary)'; isValid = false; } 
+        else { errorElement.style.display = 'none'; field.style.borderColor = ''; }
+      });
+      const emailsField = document.getElementById('emails'); const emailsError = document.getElementById('emails-error');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emails = emailsField.value.split(',').map(email => email.trim()).filter(email => email);
+      if (emails.length === 0 || !emails.every(email => emailRegex.test(email))) {
+        emailsError.style.display = 'block'; emailsField.style.borderColor = 'var(--primary)'; isValid = false;
+      } else { emailsError.style.display = 'none'; emailsField.style.borderColor = ''; }
+      return isValid;
+    }
+
+    function validateAndStart() {
+      if (!validateForm()) { alert("Please fill all required fields correctly."); return; }
+      saveState(); renderChecklist(); goToStep(2);
+    }
+
+    async function renderChecklist() {
+        checklistForm.innerHTML = '';
+        const categories = checklistData.reduce((acc, item) => {
+            if (!acc[item.category]) acc[item.category] = [];
+            acc[item.category].push(item); return acc;
+        }, {});
+        
+        let itemIndex = 0;
+        for (const category of Object.keys(categories)) {
+            const section = document.createElement('div');
+            section.className = 'section'; section.id = `section-${sanitizeForId(category)}`;
+            const itemsHTML = await Promise.all(categories[category].map(async (item, localIndex) => {
+                const globalIndex = itemIndex++;
+                return await renderCategoryItem(item, globalIndex);
+            }));
+            section.innerHTML = `<div class="section-header" onclick="toggleSection(this)"><div class="section-title"><i class="fas fa-list-check"></i><span>${translations[currentLang][category] || category}</span></div><span class="section-status" id="status-${sanitizeForId(category)}">0/${categories[category].length}</span><span>▼</span></div><div class="section-content">${itemsHTML.join('')}</div>`;
+            checklistForm.appendChild(section);
+        }
+        
+        Object.keys(inspectionState.responses).forEach(itemId => {
+            const { response, remarks } = inspectionState.responses[itemId];
+            if (response) { 
+                const radio = document.querySelector(`input[name="${itemId}"][value="${response}"]`); 
+                if (radio) {
+                    // Manually trigger the selection logic without updating progress immediately
+                    const element = radio.parentElement;
+                    document.querySelectorAll(`input[name="${itemId}"]`).forEach(r => r.parentElement.classList.remove('selected', 'selected-ok', 'selected-na'));
+                    element.classList.add('selected');
+                    if (response === 'OK') element.classList.add('selected-ok'); else if (response === 'N/A') element.classList.add('selected-na');
+                    radio.checked = true;
+                }
+            }
+            const remarksText = document.getElementById(`${itemId}-remarks-text`); 
+            if (remarksText) { 
+                remarksText.value = remarks;
+                document.getElementById(`${itemId}-remarks`).classList.toggle('show', inspectionState.responses[itemId].response === 'NOT OK');
+            }
+        });
+        updateProgress();
+    }
+
+    async function renderCategoryItem(item, index) {
+        const itemId = `item-${sanitizeForId(item.category)}-${index}`;
+        const hasPhoto = inspectionState.photoKeys[itemId];
+        let photoPreviewSrc = '';
+        if (hasPhoto) {
+            const photoBlob = await getPhoto(itemId);
+            if(photoBlob) photoPreviewSrc = URL.createObjectURL(photoBlob);
+        }
+        
+        // OPTIMIZATION: Removed capture="environment" to allow browsing from gallery.
+        // We also use a custom label for the file input to create a visible button.
+        return `<div class="form-group">
+            <label>${translations[currentLang][item.item] || item.item}</label>
+            <div class="radio-group">
+                ${item.options.map(opt => `<div class="radio-option" onclick="selectOption(this, '${itemId}', '${opt}')">
+                    <input type="radio" class="radio-input" name="${itemId}" value="${opt}">
+                    <span class="status-indicator status-${opt.toLowerCase().replace(/ /g,'-')}"></span>
+                    ${translations[currentLang][opt] || opt}
+                </div>`).join('')}
+            </div>
+            <div class="remarks-field" id="${itemId}-remarks" style="display: ${inspectionState.responses[itemId]?.response === 'NOT OK' ? 'block' : 'none'};">
+                <label>${translations[currentLang]['Remarks']}</label>
+                <textarea id="${itemId}-remarks-text" rows="2" placeholder="${translations[currentLang]['Remarks']}" oninput="updateRemarks('${itemId}', this.value)"></textarea>
+            </div>
+            <div class="photo-upload">
+                <input type="file" id="${itemId}-photo" accept="image/*" onchange="previewPhoto('${itemId}')">
+                <label for="${itemId}-photo"><i class="fas fa-camera"></i> ${translations[currentLang]['Attach Photo']}</label>
+                <div id="${itemId}-preview-container" class="photo-preview-container ${hasPhoto ? 'show' : ''}">
+                    <img id="${itemId}-preview" class="photo-preview" src="${photoPreviewSrc}">
+                    <button class="remove-photo-btn" onclick="removePhoto('${itemId}')">&times;</button>
+                </div>
+                <div class="photo-counter" id="${itemId}-counter">${hasPhoto ? '1 photo selected' : 'No photo selected'}</div>
+            </div>
+        </div>`;
+    }
+
+
+    function selectOption(element, itemId, option) {
+        document.querySelectorAll(`input[name="${itemId}"]`).forEach(radio => radio.parentElement.classList.remove('selected', 'selected-ok', 'selected-na'));
+        element.classList.add('selected');
+        if (option === 'OK') element.classList.add('selected-ok'); else if (option === 'N/A') element.classList.add('selected-na');
+        element.querySelector('input').checked = true;
+        if (!inspectionState.responses[itemId]) inspectionState.responses[itemId] = {};
+        inspectionState.responses[itemId].response = option;
+        
+        // Show/Hide remarks dynamically
+        const remarksField = document.getElementById(`${itemId}-remarks`);
+        if (remarksField) {
+            remarksField.style.display = option === 'NOT OK' ? 'block' : 'none';
+        }
+
+        updateProgress();
+    }
+    
+    function updateRemarks(itemId, value) {
+        if (!inspectionState.responses[itemId]) inspectionState.responses[itemId] = {};
+        inspectionState.responses[itemId].remarks = value;
+        saveState();
+    }
+
+    async function previewPhoto(itemId) {
+        const fileInput = document.getElementById(`${itemId}-photo`); const previewContainer = document.getElementById(`${itemId}-preview-container`);
+        const preview = document.getElementById(`${itemId}-preview`); const counter = document.getElementById(`${itemId}-counter`);
+        if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
+            try {
+                // Resize or compress image before storing for performance/storage optimization (advanced feature not implemented here but recommended)
+                await storePhoto(itemId, file);
+                const oldSrc = preview.src; if (oldSrc) URL.revokeObjectURL(oldSrc);
+                preview.src = URL.createObjectURL(file);
+                inspectionState.photoKeys[itemId] = true;
+                previewContainer.classList.add('show'); counter.textContent = `1 photo selected`;
+                saveState();
+            } catch (error) { console.error("Error storing photo:", error); alert("Could not save photo. The storage might be full or corrupted."); }
+        }
+    }
+    
+    async function removePhoto(itemId) {
+        document.getElementById(`${itemId}-photo`).value = ''; const preview = document.getElementById(`${itemId}-preview`);
+        if (preview.src) URL.revokeObjectURL(preview.src);
+        preview.src = ''; document.getElementById(`${itemId}-preview-container`).classList.remove('show');
+        document.getElementById(`${itemId}-counter`).textContent = 'No photo selected'; delete inspectionState.photoKeys[itemId];
+        await deletePhoto(itemId); saveState();
+    }
+
+
+    function toggleSection(header) {
+      const section = header.parentElement; const arrow = header.querySelector('span:last-child');
+      section.classList.toggle('expanded'); header.nextElementSibling.style.display = section.classList.contains('expanded') ? 'block' : 'none';
+      arrow.textContent = section.classList.contains('expanded') ? '▲' : '▼';
+    }
+
+    async function submitInspection() {
+      if (Object.keys(inspectionState.responses).length < checklistData.length) { alert("Please complete all inspection items before submitting."); return; }
+      await generateReport(); goToStep(3);
+    }
+
+    async function generateReport() {
+        showLoader("Generating Report...");
+        const basicInfo = JSON.parse(localStorage.getItem('currentInspectionBasicInfo'));
+        
+        let photoDataUrls = {};
+        const photoKeys = Object.keys(inspectionState.photoKeys);
+        for(const key of photoKeys) {
+            const blob = await getPhoto(key);
+            if(blob) photoDataUrls[key] = await fileToDataURL(blob);
+        }
+
+        const responses = checklistData.map((item, index) => {
+            const itemId = `item-${sanitizeForId(item.category)}-${index}`;
+            const state = inspectionState.responses[itemId] || {};
+            return {
+                category: item.category, item: item.item, response: state.response || 'N/A', remarks: state.remarks || '',
+                photoUrl: photoDataUrls[itemId] || ''
+            };
+        });
+        
+        let reportHTML = `<div class="report-section"><h3>${translations[currentLang]['Equipment']}: ${basicInfo.equipment}</h3><div class="report-item"><p><strong>${translations[currentLang]['Equipment Type']}:</strong> ${basicInfo.equipmentType}</p><p><strong>${translations[currentLang]['Area/Location']}:</strong> ${basicInfo.areaLocation}</p><p><strong>${translations[currentLang]['Tag No / Description']}:</strong> ${basicInfo.tagNo}</p><p><strong>${translations[currentLang]['Inspected By']}:</strong> ${basicInfo.inspectedBy}</p><p><strong>${translations[currentLang]['Date']}:</strong> ${basicInfo.inspectionDate}</p><p><strong>${translations[currentLang]['Time']}:</strong> ${basicInfo.inspectionTime}</p></div>`;
+        let currentCategory = '';
+        responses.forEach(r => {
+            if (r.category !== currentCategory) { currentCategory = r.category; reportHTML += `<div class="report-category" style="font-weight: 600; color: var(--primary); margin: 16px 0 12px; padding: 12px; background: rgba(211, 47, 47, 0.05); border-radius: 4px; border-left: 4px solid var(--primary);">${translations[currentLang][r.category] || r.category}</div>`; }
+            const statusClass = r.response === 'OK' ? 'status-ok' : r.response === 'NOT OK' ? 'status-not-ok' : 'status-na';
+            reportHTML += `<div class="report-item" style="padding: 16px; margin: 12px 0; border: 1px solid var(--border); border-radius: 4px; background: white;"><strong>${translations[currentLang][r.item] || r.item}:</strong> <span class="status-indicator" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; background-color: ${r.response === 'OK' ? '#2e7d32' : r.response === 'NOT OK' ? '#d32f2f' : '#37474f'};"></span> ${translations[currentLang][r.response] || r.response}${r.remarks ? `<div class="comment-box" style="margin-top: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 4px; background: white;"><strong>${translations[currentLang]['Remarks']}:</strong> ${r.remarks}</div>` : ''}${r.photoUrl ? `<div><img src="${r.photoUrl}" class="photo-preview show" style="max-width: 200px; margin-top: 10px;"></div>` : ''}</div>`;
+        });
+        reportHTML += `</div>`;
+        reportOutput.innerHTML = reportHTML;
+        emailInstructions.value = `To: ${basicInfo.emails}\nSubject: Inspection Report - ${basicInfo.equipment}\n\nPlease find attached the inspection report for ${basicInfo.equipment}.\n\nReport Summary:\n- Equipment: ${basicInfo.equipment}\n- Date: ${basicInfo.inspectionDate}\n- Inspector: ${basicInfo.inspectedBy}\n\nPlease review the attached PDF for detailed findings.`;
+        saveToHistory({ ...basicInfo, responses: responses, submittedAt: new Date().toISOString() });
+        hideLoader();
+    }
+    
+    function copyEmailInstructions() {
+        navigator.clipboard.writeText(emailInstructions.value).then(() => { alert('Email instructions copied to clipboard!'); });
+    }
+
+    function saveToHistory(inspection) {
+      const history = JSON.parse(localStorage.getItem('inspectionHistory') || '[]');
+      history.push(inspection); localStorage.setItem('inspectionHistory', JSON.stringify(history));
+    }
+
+    function showHistory() {
+      const history = JSON.parse(localStorage.getItem('inspectionHistory') || '[]');
+      if (history.length === 0) { historyList.innerHTML = `<p data-en="No inspection history found." data-ar="لا يوجد سجل فحوصات.">${translations[currentLang]['No inspection history found.'] || 'No inspection history found.'}</p>`; } 
+      else { historyList.innerHTML = history.map((item, index) => `<div class="history-item" onclick="loadHistoryItem(${index})" style="padding: 16px; border: 1px solid var(--border); border-radius: 4px; margin: 12px 0; background: white; cursor: pointer;"><div class="history-header" style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span class="history-date" style="font-weight: 600; color: var(--primary);">${item.inspectionDate}</span><span class="history-equipment" style="font-weight: 600;">${item.equipment}</span></div><div class="history-details" style="color: var(--dark-alt); font-size: 14px;"><p>${item.equipmentType} - ${item.areaLocation}</p><p>Inspected by: ${item.inspectedBy}</p></div></div>`).join(''); }
+      historyModal.classList.remove('hidden');
+    }
+
+    function hideHistory() { historyModal.classList.add('hidden'); }
+
+    function loadHistoryItem(index) {
+      const history = JSON.parse(localStorage.getItem('inspectionHistory') || '[]'); const item = history[index];
+      if (item) {
+        if (!confirm("Loading a past inspection will overwrite the current basic info. Continue?")) return;
+        document.getElementById('equipmentType').value = item.equipmentType || ''; document.getElementById('areaLocation').value = item.areaLocation || '';
+        document.getElementById('tagNo').value = item.tagNo || ''; document.getElementById('inspectedBy').value = item.inspectedBy || '';
+        document.getElementById('inspectionDate').value = item.inspectionDate || ''; document.getElementById('inspectionTime').value = item.inspectionTime || '';
+        document.getElementById('emails').value = item.emails || ''; document.getElementById('equipment').value = item.equipment || '';
+        hideHistory(); updateProgress();
+      }
+    }
+    
+    // PDF and Excel functions are resource-heavy and remain largely the same, relying on jspdf and xlsx libraries.
+    async function downloadPDF() {
+        showLoader("Generating PDF...");
+        try {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            const basicInfo = JSON.parse(localStorage.getItem('currentInspectionBasicInfo'));
+            const history = JSON.parse(localStorage.getItem('inspectionHistory') || '[]');
+            const latestInspection = history[history.length - 1];
+            if (!basicInfo || !latestInspection) throw new Error("No inspection data found.");
+
+            doc.setFontSize(20); doc.setFont("helvetica", "bold");
+            doc.text("Weekly Inspection Report", doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+            doc.setFontSize(14); doc.setFont("helvetica", "normal");
+            doc.text(`Equipment: ${basicInfo.equipment}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+            
+            doc.autoTable({ startY: 40, body: [['Equipment Type', basicInfo.equipmentType, 'Inspected By', basicInfo.inspectedBy],['Area / Location', basicInfo.areaLocation, 'Date of Inspection', basicInfo.inspectionDate],['Tag No / Description', basicInfo.tagNo, 'Time of Inspection', basicInfo.inspectionTime]], theme: 'grid', styles: { font: 'helvetica', fontSize: 10 }, columnStyles: { 0: { fontStyle: 'bold' }, 2: { fontStyle: 'bold' } } });
+            
+            let photoAppendix = []; let photoCounter = 1;
+            const photoDataUrls = {};
+            const photoKeys = Object.keys(inspectionState.photoKeys);
+            for(const key of photoKeys) {
+                const blob = await getPhoto(key);
+                if(blob) photoDataUrls[key] = await fileToDataURL(blob);
+            }
+
+            const tableBody = latestInspection.responses.map((r, index) => {
+                const itemId = `item-${sanitizeForId(r.category)}-${index}`; let photoRef = 'No';
+                if (photoDataUrls[itemId]) {
+                    photoRef = `Ref: ${photoCounter}`;
+                    photoAppendix.push({ ref: photoCounter, item: translations[currentLang][r.item] || r.item, base64: photoDataUrls[itemId] });
+                    photoCounter++;
+                }
+                return [translations[currentLang][r.category] || r.category, translations[currentLang][r.item] || r.item, translations[currentLang][r.response] || r.response, r.remarks || '-', photoRef];
+            });
+
+            doc.autoTable({ startY: doc.autoTable.previous.finalY + 10, head: [['Category', 'Checklist Item', 'Status', 'Remarks', 'Photo']], body: tableBody, theme: 'striped', headStyles: { fillColor: [211, 47, 47] }, styles: { font: 'helvetica', fontSize: 9, cellPadding: 2 }, didParseCell: (data) => { if (data.column.index === 2 && data.cell.section === 'body') { if(data.cell.raw === 'NOT OK' || data.cell.raw === translations['ar']['NOT OK']) { data.cell.styles.fillColor = '#ffcdd2'; data.cell.styles.textColor = '#c62828'; } if(data.cell.raw === 'OK' || data.cell.raw === translations['ar']['OK']) { data.cell.styles.textColor = '#2e7d32'; } } } });
+
+            if (photoAppendix.length > 0) {
+                doc.addPage(); doc.setFontSize(16); doc.text("Photo Appendix", 14, 22);
+                let y = 30;
+                for (const photo of photoAppendix) {
+                    const img = new Image(); img.src = photo.base64;
+                    await new Promise(resolve => img.onload = resolve);
+                    const aspectRatio = img.height / img.width; const photoHeight = 80 * aspectRatio;
+                    if (y + photoHeight + 10 > doc.internal.pageSize.height - 14) { doc.addPage(); y = 20; }
+                    doc.setFontSize(10); doc.text(`Photo ${photo.ref}: ${photo.item}`, 14, y); y += 4;
+                    doc.addImage(photo.base64, 'JPEG', 14, y, 80, photoHeight); y += photoHeight + 10;
+                }
+            }
+            
+            const pageCount = doc.internal.getNumberOfPages();
+            for(let i = 1; i <= pageCount; i++) { doc.setPage(i); doc.setFontSize(8); doc.text('Page ' + i + ' of ' + pageCount, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' }); }
+
+            const fileName = `Inspection_Report_${basicInfo.equipment.replace(/[^a-zA-Z0-9]/g, '_')}_${basicInfo.inspectionDate}.pdf`;
+            doc.save(fileName);
+        } catch (error) { console.error("PDF generation failed:", error); alert("Failed to generate PDF. " + error.message); } 
+        finally { hideLoader(); }
+    }
+    
+    function downloadExcel() {
+        showLoader("Generating Excel...");
+        try {
+            const basicInfo = JSON.parse(localStorage.getItem('currentInspectionBasicInfo'));
+            const history = JSON.parse(localStorage.getItem('inspectionHistory') || '[]');
+            const latestInspection = history[history.length - 1];
+            if (!basicInfo || !latestInspection) throw new Error("No inspection data found.");
+
+            const wb = XLSX.utils.book_new();
+            const summaryData = [{"Field": "Equipment", "Value": basicInfo.equipment},{"Field": "Equipment Type", "Value": basicInfo.equipmentType},{"Field": "Area / Location", "Value": basicInfo.areaLocation},{"Field": "Tag No / Description", "Value": basicInfo.tagNo},{"Field": "Inspected By", "Value": basicInfo.inspectedBy},{"Field": "Date of Inspection", "Value": basicInfo.inspectionDate},{"Field": "Time of Inspection", "Value": basicInfo.inspectionTime}];
+            const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+            wsSummary['!cols'] = [{ wch: 25 }, { wch: 40 }];
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Inspection Summary");
+
+            const detailsData = latestInspection.responses.map((r, index) => ({ "Category": translations[currentLang][r.category] || r.category, "Checklist Item": translations[currentLang][r.item] || r.item, "Status": translations[currentLang][r.response] || r.response, "Remarks": r.remarks || '', "Photo Attached": inspectionState.photoKeys[`item-${sanitizeForId(r.category)}-${index}`] ? 'Yes' : 'No' }));
+            const wsDetails = XLSX.utils.json_to_sheet(detailsData);
+            wsDetails['!cols'] = [{ wch: 30 }, { wch: 40 }, { wch: 15 }, { wch: 50 }, { wch: 15 }];
+            XLSX.utils.book_append_sheet(wb, wsDetails, "Checklist Details");
+
+            const fileName = `Inspection_Report_${basicInfo.equipment.replace(/[^a-zA-Z0-9]/g, '_')}_${basicInfo.inspectionDate}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        } catch (error) { console.error("Excel generation failed:", error); alert("Failed to generate Excel file. " + error.message); } 
+        finally { hideLoader(); }
+    }
+    
+    function shareByEmail() {
+        const basicInfo = JSON.parse(localStorage.getItem('currentInspectionBasicInfo')); if (!basicInfo) { alert("Please complete the basic information first."); return; }
+        const subject = `Inspection Report: ${basicInfo.equipment} on ${basicInfo.inspectionDate}`;
+        const body = `Dear Team,\n\nPlease find the inspection report for ${basicInfo.equipment}, conducted by ${basicInfo.inspectedBy} on ${basicInfo.inspectionDate}.\n\n**Please download the PDF report from the web page and attach it to this email before sending. The PDF contains all details, including photos.**\n\nSummary:\n- Equipment: ${basicInfo.equipment}\n- Inspected By: ${basicInfo.inspectedBy}\n- Date: ${basicInfo.inspectionDate}\n\nThank you.`;
+        window.location.href = `mailto:${basicInfo.emails || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    function showLoader(text = "Processing...") { loaderText.textContent = text; loaderOverlay.classList.remove('hidden'); }
+    function hideLoader() { loaderOverlay.classList.add('hidden'); }
+
+    function updateProgress() {
+      saveState();
+      const requiredFields = ['equipmentType', 'areaLocation', 'tagNo', 'inspectedBy', 'inspectionDate', 'inspectionTime', 'emails', 'equipment'];
+      let filledFields = requiredFields.filter(id => document.getElementById(id)?.value.trim()).length;
+      const step1Percent = Math.round((filledFields / requiredFields.length) * 100);
+      progressFill.style.width = `${step1Percent}%`;
+      progressText.textContent = `${step1Percent}% Complete`;
+      beginBtn.disabled = step1Percent < 100;
+      
+      if (currentStep === 2) {
+        const categories = {};
+        checklistData.forEach(item => { if (!categories[item.category]) categories[item.category] = { total: 0, completed: 0 }; categories[item.category].total++; });
+        let completedItems = 0; let notOkCount = 0;
+        checklistData.forEach((item, index) => {
+            const itemId = `item-${sanitizeForId(item.category)}-${index}`;
+            const response = inspectionState.responses[itemId]?.response;
+            if (response) { completedItems++; categories[item.category].completed++; if (response === 'NOT OK') notOkCount++; }
+        });
+        Object.keys(categories).forEach(category => {
+          const catId = sanitizeForId(category);
+          const statusElement = document.getElementById(`status-${catId}`);
+          const sectionElement = document.getElementById(`section-${catId}`);
+          if (statusElement) {
+            const { completed, total } = categories[category];
+            statusElement.textContent = `${completed}/${total}`;
+            if (sectionElement) sectionElement.classList.toggle('completed', completed === total);
+          }
+        });
+        const totalItems = checklistData.length;
+        const step2Percent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+        progressFillInspect.style.width = `${step2Percent}%`;
+        progressTextInspect.textContent = `${step2Percent}% Complete (${completedItems}/${totalItems})`;
+        issueCounter.textContent = notOkCount > 0 ? `${notOkCount} issue(s) found` : '';
+        submitReportBtn.disabled = completedItems < totalItems;
+      }
+    }
+
+    async function init() {
+      try { await initDB(); } catch (error) { console.error("Database could not be opened.", error); alert("Warning: Photo storage is unavailable. Please check browser settings."); }
+      initializeChecklist();
+      setLang('en');
+      loadState();
+      const inputs = ['equipmentType', 'areaLocation', 'tagNo', 'inspectedBy', 'inspectionDate', 'inspectionTime', 'emails', 'equipment'];
+      inputs.forEach(id => { const element = document.getElementById(id); if (element) { element.addEventListener('input', updateProgress); element.addEventListener('change', updateProgress); }});
+      goToStep(1); updateProgress();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
